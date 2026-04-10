@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.streakly.data.local.entity.Habit
 import com.example.streakly.ui.components.HabitItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +24,7 @@ fun HabitScreen(
 ) {
     val habits by viewModel.habits.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
+    var editingHabit by remember { mutableStateOf<Habit?>(null) }
 
     Scaffold(
         topBar = {
@@ -70,7 +72,8 @@ fun HabitScreen(
                         HabitItem(
                             habit = habit,
                             onToggle = { viewModel.toggleHabit(habit) },
-                            onDelete = { viewModel.deleteHabit(habit) }
+                            onDelete = { viewModel.deleteHabit(habit) },
+                            onEdit = { editingHabit = habit }
                         )
                     }
                 }
@@ -83,6 +86,19 @@ fun HabitScreen(
                 onConfirm = { name, desc ->
                     viewModel.addHabit(name, desc)
                     showAddDialog = false
+                }
+            )
+        }
+
+        if (editingHabit != null) {
+            AddHabitDialog(
+                habit = editingHabit,
+                onDismiss = { editingHabit = null },
+                onConfirm = { name, desc ->
+                    editingHabit?.let {
+                        viewModel.updateHabit(it.copy(name = name, description = desc))
+                    }
+                    editingHabit = null
                 }
             )
         }
@@ -112,15 +128,16 @@ fun EmptyState(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHabitDialog(
+    habit: Habit? = null,
     onDismiss: () -> Unit,
     onConfirm: (String, String) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf(habit?.name ?: "") }
+    var description by remember { mutableStateOf(habit?.description ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New Habit", style = MaterialTheme.typography.titleLarge) },
+        title = { Text(if (habit == null) "New Habit" else "Edit Habit", style = MaterialTheme.typography.titleLarge) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -145,7 +162,7 @@ fun AddHabitDialog(
                 enabled = name.isNotBlank(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Add")
+                Text(if (habit == null) "Add" else "Save")
             }
         },
         dismissButton = {

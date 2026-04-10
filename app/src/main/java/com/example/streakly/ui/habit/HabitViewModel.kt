@@ -57,6 +57,12 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateHabit(habit: Habit) {
+        viewModelScope.launch {
+            repository.update(habit)
+        }
+    }
+
     fun toggleHabit(habit: Habit) {
         viewModelScope.launch {
             repository.toggleHabit(habit)
