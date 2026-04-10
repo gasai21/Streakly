@@ -185,6 +185,82 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Weekly Progress Section
+            Text(
+                "Weekly Overview",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    if (habits.isEmpty()) {
+                        Text(
+                            "No habits to track yet",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally)
+                        )
+                    } else {
+                        habits.forEach { habit ->
+                            val dayOfWeek = today.dayOfWeek.value // 1 (Mon) to 7 (Sun)
+                            val repeatDays = if (habit.repeat == "Daily") 7 else habit.repeat.split(",").size
+                            
+                            // Estimate how many days completed this week using streak
+                            val completedDaysThisWeek = if (habit.isCompletedToday) {
+                                minOf(dayOfWeek, habit.streak)
+                            } else {
+                                minOf(dayOfWeek - 1, habit.streak)
+                            }
+                            
+                            val weeklyTarget = habit.targetValue * repeatDays
+                            // Calculate current weekly progress: (fully completed days * target) + today's partial progress
+                            val completedFullDaysCount = (completedDaysThisWeek - if(habit.isCompletedToday) 1 else 0).coerceAtLeast(0)
+                            val currentWeeklyProgress = (completedFullDaysCount * habit.targetValue) + habit.currentProgress
+                            
+                            val progressValue = if (weeklyTarget > 0) {
+                                (currentWeeklyProgress / weeklyTarget).toFloat().coerceIn(0f, 1f)
+                            } else 0f
+
+                            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = habit.name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "${(progressValue * 100).toInt()}%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                LinearProgressIndicator(
+                                    progress = { progressValue },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(CircleShape),
+                                    color = Color(0xFFFF6D00),
+                                    trackColor = Color(0xFFFBE9E7)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             // Habits List Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
