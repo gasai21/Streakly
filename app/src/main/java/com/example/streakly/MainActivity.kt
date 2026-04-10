@@ -53,7 +53,16 @@ class MainActivity : ComponentActivity() {
                         AddEditHabitScreen(
                             onBack = { navController.popBackStack() },
                             onSave = { habit ->
-                                viewModel.addHabit(habit.name, habit.description, habit.iconEmoji, habit.durationMinutes, habit.goal, habit.repeat)
+                                viewModel.addHabit(
+                                    name = habit.name,
+                                    description = habit.description,
+                                    emoji = habit.iconEmoji,
+                                    duration = habit.durationMinutes,
+                                    goal = habit.goal,
+                                    targetValue = habit.targetValue,
+                                    unit = habit.unit,
+                                    repeat = habit.repeat
+                                )
                                 navController.popBackStack()
                             }
                         )

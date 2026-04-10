@@ -189,7 +189,20 @@ fun OnboardingScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Button(
-                    onClick = { onComplete(name, selectedHabits.toList()) },
+                    onClick = { 
+                        val numberRegex = """(\d+\.?\d*)""".toRegex()
+                        val finalHabits = selectedHabits.map { habit ->
+                            val match = numberRegex.find(habit.goal)
+                            val numericGoal = match?.value?.toDoubleOrNull() ?: 1.0
+                            val unit = if (match != null) habit.goal.replace(match.value, "").trim() else ""
+                            
+                            habit.copy(
+                                targetValue = numericGoal,
+                                unit = unit
+                            )
+                        }
+                        onComplete(name, finalHabits) 
+                    },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E342E))

@@ -262,15 +262,22 @@ fun AddEditHabitScreen(
             Button(
                 onClick = {
                     val repeatStr = if (selectedDays.size == 7) "Daily" else selectedDays.joinToString(",")
-                    val finalHabit = (habit ?: Habit(name = name)).copy(
-                        name = name,
-                        description = description,
-                        goal = goal,
-                        repeat = repeatStr,
-                        iconEmoji = iconEmoji
-                    )
-                    onSave(finalHabit)
-                },
+                    val numberRegex = """(\d+\.?\d*)""".toRegex()
+                val match = numberRegex.find(goal)
+                val numericGoal = match?.value?.toDoubleOrNull() ?: 0.0
+                val unit = if (match != null) goal.replace(match.value, "").trim() else ""
+
+                val finalHabit = (habit ?: Habit(name = name)).copy(
+                    name = name,
+                    description = description,
+                    goal = goal,
+                    targetValue = numericGoal,
+                    unit = unit,
+                    repeat = repeatStr,
+                    iconEmoji = iconEmoji
+                )
+                onSave(finalHabit)
+            },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

@@ -51,9 +51,9 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addHabit(name: String, description: String = "", emoji: String = "✨", duration: Int = 5, goal: String = "", repeat: String = "Daily") {
+    fun addHabit(name: String, description: String = "", emoji: String = "✨", duration: Int = 5, goal: String = "", targetValue: Double = 0.0, unit: String = "", repeat: String = "Daily") {
         viewModelScope.launch {
-            repository.insert(Habit(name = name, description = description, iconEmoji = emoji, durationMinutes = duration, goal = goal, repeat = repeat))
+            repository.insert(Habit(name = name, description = description, iconEmoji = emoji, durationMinutes = duration, goal = goal, targetValue = targetValue, unit = unit, repeat = repeat))
         }
     }
 
@@ -63,9 +63,24 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun toggleHabit(habit: Habit) {
+    fun updateProgress(habit: Habit, newProgress: Double) {
         viewModelScope.launch {
-            repository.toggleHabit(habit)
+            val isNowCompleted = newProgress >= habit.targetValue
+            val wasCompleted = habit.isCompletedToday
+            
+            var newStreak = habit.streak
+            if (isNowCompleted && !wasCompleted) {
+                newStreak += 1
+            } else if (!isNowCompleted && wasCompleted) {
+                newStreak = maxOf(0, newStreak - 1)
+            }
+
+            repository.update(habit.copy(
+                currentProgress = newProgress,
+                isCompletedToday = isNowCompleted,
+                streak = newStreak,
+                lastCompletedTimestamp = if (isNowCompleted) System.currentTimeMillis() else habit.lastCompletedTimestamp
+            ))
         }
     }
 

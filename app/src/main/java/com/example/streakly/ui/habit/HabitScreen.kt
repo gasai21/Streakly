@@ -71,7 +71,7 @@ fun HabitScreen(
                     items(habits, key = { it.id }) { habit ->
                         HabitItem(
                             habit = habit,
-                            onToggle = { viewModel.toggleHabit(habit) },
+                            onProgressUpdate = { viewModel.updateProgress(habit, it) },
                             onDelete = { viewModel.deleteHabit(habit) },
                             onEdit = { editingHabit = habit }
                         )
@@ -96,7 +96,19 @@ fun HabitScreen(
                 onDismiss = { editingHabit = null },
                 onConfirm = { name, desc, goal, repeat ->
                     editingHabit?.let {
-                        viewModel.updateHabit(it.copy(name = name, description = desc, goal = goal, repeat = repeat))
+                        val numberRegex = """(\d+\.?\d*)""".toRegex()
+                        val match = numberRegex.find(goal)
+                        val numericGoal = match?.value?.toDoubleOrNull() ?: 0.0
+                        val unit = if (match != null) goal.replace(match.value, "").trim() else ""
+
+                        viewModel.updateHabit(it.copy(
+                            name = name, 
+                            description = desc, 
+                            goal = goal, 
+                            targetValue = numericGoal,
+                            unit = unit,
+                            repeat = repeat
+                        ))
                     }
                     editingHabit = null
                 }

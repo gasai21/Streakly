@@ -16,5 +16,8 @@ data class Habit(
     val iconEmoji: String = "✨",
     val repeat: String = "Daily",
     val goal: String = "",
+    val targetValue: Double = 0.0,
+    val currentProgress: Double = 0.0,
+    val unit: String = "",
     val createdAt: Long = System.currentTimeMillis()
 )

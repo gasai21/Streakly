@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,12 +23,13 @@ import com.example.streakly.data.local.entity.Habit
 @Composable
 fun HabitItem(
     habit: Habit,
-    onToggle: () -> Unit,
+    onProgressUpdate: (Double) -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val progress = if (habit.targetValue > 0) (habit.currentProgress / habit.targetValue).coerceIn(0.0, 1.0).toFloat() else 0f
 
     Row(
         modifier = modifier
@@ -39,26 +37,17 @@ fun HabitItem(
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Completion Indicator (Dot)
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .border(2.dp, if (habit.isCompletedToday) Color(0xFFFF6D00) else Color.LightGray, CircleShape)
-                .background(if (habit.isCompletedToday) Color(0xFFFF6D00) else Color.Transparent)
-                .clickable { onToggle() },
-            contentAlignment = Alignment.Center
-        ) {
-            if (habit.isCompletedToday) {
-                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color.White))
-            }
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
         // Main Content Card
         Card(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    if (habit.currentProgress < habit.targetValue) {
+                        onProgressUpdate(habit.currentProgress + 1)
+                    } else {
+                        onProgressUpdate(0.0)
+                    }
+                },
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -90,12 +79,24 @@ fun HabitItem(
                         fontWeight = FontWeight.Bold
                     )
                     if (habit.goal.isNotBlank()) {
-                        Text(
-                            text = habit.goal,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${habit.currentProgress.toInt()}/${habit.targetValue.toInt()} ${habit.unit}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            LinearProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .height(4.dp)
+                                    .clip(CircleShape),
+                                color = Color(0xFFFF6D00),
+                                trackColor = Color.LightGray.copy(alpha = 0.3f)
+                            )
+                        }
                     }
                     Text(
                         text = "Streak ${habit.streak} days • ${habit.repeat}",

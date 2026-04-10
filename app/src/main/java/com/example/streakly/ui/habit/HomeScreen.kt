@@ -116,11 +116,20 @@ fun HomeScreen(
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = date.dayOfMonth.toString(),
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSelected) Color.White else Color.Black
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) Color(0xFFFF6D00) else Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = date.dayOfMonth.toString(),
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected) Color.White else Color.Black,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }
@@ -183,16 +192,16 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Daily routine", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                TextButton(onClick = { onAddHabit() }) {
-                    Text("See all", color = Color.Gray)
-                }
+//                TextButton(onClick = { onAddHabit() }) {
+//                    Text("See all", color = Color.Gray)
+//                }
             }
 
             // Habits List
             habits.forEach { habit ->
                 HabitItem(
                     habit = habit,
-                    onToggle = { viewModel.toggleHabit(habit) },
+                    onProgressUpdate = { viewModel.updateProgress(habit, it) },
                     onDelete = { viewModel.deleteHabit(habit) },
                     onEdit = { onEditHabit(habit.id) }
                 )
