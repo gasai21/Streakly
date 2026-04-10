@@ -83,8 +83,8 @@ fun HabitScreen(
         if (showAddDialog) {
             AddHabitDialog(
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, desc ->
-                    viewModel.addHabit(name, desc)
+                onConfirm = { name, desc, goal, repeat ->
+                    viewModel.addHabit(name, desc, goal = goal, repeat = repeat)
                     showAddDialog = false
                 }
             )
@@ -94,9 +94,9 @@ fun HabitScreen(
             AddHabitDialog(
                 habit = editingHabit,
                 onDismiss = { editingHabit = null },
-                onConfirm = { name, desc ->
+                onConfirm = { name, desc, goal, repeat ->
                     editingHabit?.let {
-                        viewModel.updateHabit(it.copy(name = name, description = desc))
+                        viewModel.updateHabit(it.copy(name = name, description = desc, goal = goal, repeat = repeat))
                     }
                     editingHabit = null
                 }
@@ -130,10 +130,15 @@ fun EmptyState(modifier: Modifier = Modifier) {
 fun AddHabitDialog(
     habit: Habit? = null,
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (String, String, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf(habit?.name ?: "") }
     var description by remember { mutableStateOf(habit?.description ?: "") }
+    var goal by remember { mutableStateOf(habit?.goal ?: "") }
+    var repeat by remember { mutableStateOf(habit?.repeat ?: "Daily") }
+
+    val repeatOptions = listOf("Daily", "Weekly", "Monthly")
+    var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -148,6 +153,45 @@ fun AddHabitDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
+                    value = goal,
+                    onValueChange = { goal = it },
+                    label = { Text("Set Goal (e.g., 2 liters, 30 mins)") },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = repeat,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Repeat") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        repeatOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    repeat = option
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
                     label = { Text("Description (Optional)") },
@@ -158,7 +202,7 @@ fun AddHabitDialog(
         },
         confirmButton = {
             Button(
-                onClick = { if (name.isNotBlank()) onConfirm(name, description) },
+                onClick = { if (name.isNotBlank()) onConfirm(name, description, goal, repeat) },
                 enabled = name.isNotBlank(),
                 shape = RoundedCornerShape(12.dp)
             ) {

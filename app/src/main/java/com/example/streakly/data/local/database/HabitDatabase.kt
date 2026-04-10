@@ -9,7 +9,7 @@ import com.example.streakly.data.local.dao.UserDao
 import com.example.streakly.data.local.entity.Habit
 import com.example.streakly.data.local.entity.User
 
-@Database(entities = [Habit::class, User::class], version = 2, exportSchema = false)
+@Database(entities = [Habit::class, User::class], version = 3, exportSchema = false)
 abstract class HabitDatabase : RoomDatabase() {
     abstract fun habitDao(): HabitDao
     abstract fun userDao(): UserDao

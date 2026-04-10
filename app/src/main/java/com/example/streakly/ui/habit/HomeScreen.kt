@@ -26,12 +26,12 @@ import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    viewModel: HabitViewModel = viewModel()
+    viewModel: HabitViewModel,
+    onAddHabit: () -> Unit,
+    onEditHabit: (Int) -> Unit
 ) {
     val habits by viewModel.habits.collectAsState()
     val userName by viewModel.userName.collectAsState()
-    var showAddDialog by remember { mutableStateOf(false) }
-    var habitToEdit by remember { mutableStateOf<Habit?>(null) }
 
     val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM, yyyy")
@@ -39,7 +39,7 @@ fun HomeScreen(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddDialog = true },
+                onClick = { onAddHabit() },
                 containerColor = Color(0xFF4E342E), 
                 contentColor = Color.White,
                 shape = CircleShape
@@ -183,7 +183,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Daily routine", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                TextButton(onClick = { }) {
+                TextButton(onClick = { onAddHabit() }) {
                     Text("See all", color = Color.Gray)
                 }
             }
@@ -194,34 +194,13 @@ fun HomeScreen(
                     habit = habit,
                     onToggle = { viewModel.toggleHabit(habit) },
                     onDelete = { viewModel.deleteHabit(habit) },
-                    onEdit = { habitToEdit = habit }
+                    onEdit = { onEditHabit(habit.id) }
                 )
             }
             
             Spacer(modifier = Modifier.height(100.dp))
         }
 
-        if (showAddDialog) {
-            AddHabitDialog(
-                onDismiss = { showAddDialog = false },
-                onConfirm = { name, desc ->
-                    viewModel.addHabit(name, desc)
-                    showAddDialog = false
-                }
-            )
-        }
-
-        if (habitToEdit != null) {
-            AddHabitDialog(
-                habit = habitToEdit,
-                onDismiss = { habitToEdit = null },
-                onConfirm = { name, desc ->
-                    // Since I don't have updateHabit yet, I'll delete and re-add for simplicity or better, add updateHabit to ViewModel
-                    viewModel.deleteHabit(habitToEdit!!)
-                    viewModel.addHabit(name, desc)
-                    habitToEdit = null
-                }
-            )
-        }
+        // The dialog logic is removed from here as it's now handled by AddEditHabitScreen
     }
 }

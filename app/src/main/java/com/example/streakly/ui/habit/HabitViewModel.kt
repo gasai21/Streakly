@@ -51,9 +51,9 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addHabit(name: String, description: String = "", emoji: String = "✨", duration: Int = 5) {
+    fun addHabit(name: String, description: String = "", emoji: String = "✨", duration: Int = 5, goal: String = "", repeat: String = "Daily") {
         viewModelScope.launch {
-            repository.insert(Habit(name = name, description = description, iconEmoji = emoji, durationMinutes = duration))
+            repository.insert(Habit(name = name, description = description, iconEmoji = emoji, durationMinutes = duration, goal = goal, repeat = repeat))
         }
     }
 

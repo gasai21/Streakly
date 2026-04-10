@@ -89,8 +89,16 @@ fun HabitItem(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
+                    if (habit.goal.isNotBlank()) {
+                        Text(
+                            text = habit.goal,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                     Text(
-                        text = "Streak ${habit.streak} days",
+                        text = "Streak ${habit.streak} days • ${habit.repeat}",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
