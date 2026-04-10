@@ -136,6 +136,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+/*
             // Reminder Banner
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFFD1B2)),
@@ -184,6 +185,7 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+*/
 
             // Weekly Progress Section
             Text(
