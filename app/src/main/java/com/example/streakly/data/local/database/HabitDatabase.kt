@@ -5,11 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.streakly.data.local.dao.HabitDao
+import com.example.streakly.data.local.dao.UserDao
 import com.example.streakly.data.local.entity.Habit
+import com.example.streakly.data.local.entity.User
 
-@Database(entities = [Habit::class], version = 1, exportSchema = false)
+@Database(entities = [Habit::class, User::class], version = 2, exportSchema = false)
 abstract class HabitDatabase : RoomDatabase() {
     abstract fun habitDao(): HabitDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
@@ -21,7 +24,9 @@ abstract class HabitDatabase : RoomDatabase() {
                     context.applicationContext,
                     HabitDatabase::class.java,
                     "habit_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration() // Simple for development
+                .build()
                 INSTANCE = instance
                 instance
             }

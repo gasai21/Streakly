@@ -1,17 +1,16 @@
 package com.example.streakly.ui.components
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,86 +27,81 @@ fun HabitItem(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor by animateColorAsState(
-        if (habit.isCompletedToday) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-        else MaterialTheme.colorScheme.surface,
-        label = "backgroundColor"
-    )
-
-    Card(
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // Completion Indicator (Dot)
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .size(24.dp)
+                .clip(CircleShape)
+                .border(2.dp, if (habit.isCompletedToday) Color(0xFFFF6D00) else Color.LightGray, CircleShape)
+                .background(if (habit.isCompletedToday) Color(0xFFFF6D00) else Color.Transparent)
+                .clickable { onToggle() },
+            contentAlignment = Alignment.Center
         ) {
-            // Streak Section
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(end = 16.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.LocalFireDepartment,
-                    contentDescription = "Streak",
-                    tint = if (habit.streak > 0) MaterialTheme.colorScheme.secondary else Color.Gray,
-                    modifier = Modifier.size(28.dp)
-                )
-                Text(
-                    text = habit.streak.toString(),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (habit.streak > 0) MaterialTheme.colorScheme.secondary else Color.Gray
-                )
+            if (habit.isCompletedToday) {
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color.White))
             }
+        }
 
-            // Habit Info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = habit.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                if (habit.description.isNotEmpty()) {
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // Main Content Card
+        Card(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Icon Box
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFFBE9E7)), // Light orange/beige
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(habit.iconEmoji, fontSize = 24.sp)
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Text Info
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = habit.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        text = habit.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Streak ${habit.streak} days",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
                     )
                 }
-            }
 
-            // Actions
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (habit.isCompletedToday) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    )
-                    .clickable { onToggle() },
-                contentAlignment = Alignment.Center
-            ) {
-                if (habit.isCompletedToday) {
+                // Duration
+                Column(horizontalAlignment = Alignment.End) {
                     Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Completed",
-                        tint = Color.White
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "${habit.durationMinutes} min",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
                     )
                 }
             }
